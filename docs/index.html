@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dynamic Island for Windows – interactive demo</title>
+  <meta name="description" content="Click through the states of a floating Dynamic Island pill for the Windows desktop: call, timer, music and a price alert. Interactive design preview.">
+  <meta property="og:title" content="Dynamic Island for Windows">
+  <meta property="og:description" content="A floating, expandable pill for your Windows desktop. Click through the states.">
+  <meta property="og:image" content="assets/social-preview.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <h1>Dynamic Island <span>for Windows</span></h1>
+    <p>An always-on-top pill that expands. Click it, or pick a state below.</p>
+    <p class="note">Interactive design preview in plain HTML/CSS/JS. All names, tracks, routes and prices are made-up sample data.</p>
+  </header>
+
+  <main>
+    <div class="stage" id="stage">
+      <div class="island" id="island" data-state="idle" aria-live="polite">
+        <!-- collapsed row: one variant per state -->
+        <div class="row" id="row" role="button" tabindex="0" aria-expanded="false" aria-label="Toggle island">
+          <div class="c c-idle">
+            <span class="dot"></span><span class="label">Dynamic Island</span><span class="spacer"></span><span class="clock" data-clock></span>
+          </div>
+          <div class="c c-call">
+            <span class="avatar sm">AS</span>
+            <span class="two"><b>Alex Sample</b><small data-call-sub>Incoming call</small></span>
+            <span class="spacer"></span>
+            <button class="round red xs" data-act="call-end" aria-label="Decline"><svg viewBox="0 0 24 24"><path d="M3 15c5-5 13-5 18 0l-2.5 2.5-3-1.5v-2.5a11 11 0 0 0-7 0V16l-3 1.5z"/></svg></button>
+            <button class="round green xs" data-act="call-accept" aria-label="Accept" data-call-accept><svg viewBox="0 0 24 24"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11 11 0 0 0 3.6.6 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.6 3.6a1 1 0 0 1-.25 1z"/></svg></button>
+          </div>
+          <div class="c c-timer">
+            <svg class="mini-ring" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" class="bg"/><circle cx="12" cy="12" r="9" class="fg" data-mini-ring/></svg>
+            <span class="label">Focus <b data-timer-text>25:00</b></span>
+          </div>
+          <div class="c c-music">
+            <span class="eq" data-eq><i></i><i></i><i></i><i></i></span>
+            <span class="label" data-music-line>Sample Track — Sample Artist</span>
+          </div>
+          <div class="c c-flight">
+            <svg class="plane" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg>
+            <span class="label" data-flight-line>AAA → BBB · $189</span>
+            <span class="spacer"></span><span class="badge down" data-flight-drop>-21%</span>
+          </div>
+        </div>
+
+        <!-- expanded panels -->
+        <div class="panels">
+          <section class="p p-idle">
+            <div class="big-time" data-clock-big></div>
+            <div class="muted" data-date></div>
+            <div class="chips"><span class="chip">Clock</span><span class="chip">Weather</span><span class="chip">Battery</span></div>
+          </section>
+
+          <section class="p p-call">
+            <div class="avatar lg">AS</div>
+            <div class="grow">
+              <h2>Alex Sample</h2>
+              <div class="muted" data-call-status>Incoming call…</div>
+              <div class="wave" data-wave><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+              <div class="btns">
+                <button class="btn" data-act="mute" data-mute>Mute</button>
+                <button class="btn red" data-act="call-end">End</button>
+                <button class="btn green" data-act="call-accept" data-call-accept2>Accept</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="p p-timer">
+            <div class="ring-wrap">
+              <svg viewBox="0 0 120 120" class="ring"><circle cx="60" cy="60" r="52" class="bg"/><circle cx="60" cy="60" r="52" class="fg" data-ring/></svg>
+              <div class="ring-text"><b data-timer-big>25:00</b><small data-timer-phase>Focus</small></div>
+            </div>
+            <div class="grow">
+              <h2>Pomodoro</h2>
+              <div class="muted">25 min focus · 5 min break</div>
+              <div class="btns">
+                <button class="btn primary" data-act="timer-toggle" data-timer-toggle>Pause</button>
+                <button class="btn" data-act="timer-reset">Reset</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="p p-music">
+            <div class="art"><svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="7" cy="18" r="2.5"/><circle cx="17" cy="16" r="2.5"/></svg></div>
+            <div class="grow">
+              <h2 data-track-title>Sample Track</h2>
+              <div class="muted" data-track-artist>Sample Artist</div>
+              <div class="progress"><div data-progress></div></div>
+              <div class="times muted"><span data-pos>0:00</span><span data-dur>3:20</span></div>
+              <div class="btns center">
+                <button class="btn icon" data-act="prev" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zM9.5 12 18 6v12z"/></svg></button>
+                <button class="btn icon primary" data-act="play" data-play aria-label="Play or pause"><svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg></button>
+                <button class="btn icon" data-act="next" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg></button>
+              </div>
+            </div>
+          </section>
+
+          <section class="p p-flight">
+            <div class="grow">
+              <div class="tag">Price alert · sample data</div>
+              <h2 data-flight-route>AAA → BBB</h2>
+              <div class="muted" data-flight-when>12 Mar – 19 Mar · round trip</div>
+              <div class="price"><b data-flight-price>$189</b><s data-flight-was>$240</s><span class="badge down" data-flight-drop2>-21%</span></div>
+              <svg class="spark" viewBox="0 0 200 40" preserveAspectRatio="none"><polyline data-spark fill="none"/></svg>
+              <div class="btns">
+                <button class="btn primary" data-act="flight-next">Next alert</button>
+                <button class="btn" data-act="flight-dismiss">Dismiss</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <nav class="states" aria-label="Demo states">
+      <button data-state="idle" class="active">Idle</button>
+      <button data-state="call">Call</button>
+      <button data-state="timer">Timer</button>
+      <button data-state="music">Music</button>
+      <button data-state="flight">Flight alert</button>
+    </nav>
+    <p class="hint">Shortcuts: <kbd>1</kbd>–<kbd>5</kbd> switch state · <kbd>Space</kbd> expand/collapse</p>
+  </main>
+
+  <footer>
+    <p>MIT licensed · <a href="https://github.com/OWNER/dynamic-island-win">Source on GitHub</a> (link goes live once the repo is published)</p>
+  </footer>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dynamic-island-win"
+version = "0.1.0"
+description = "A floating, expandable Dynamic Island pill for the Windows desktop (Python + CustomTkinter)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+keywords = ["dynamic-island", "windows", "customtkinter", "widget", "desktop"]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: Microsoft :: Windows",
+  "Programming Language :: Python :: 3",
+  "Topic :: Desktop Environment",
+]
+dependencies = [
+  "customtkinter>=5.2",
+  "pillow>=10",
+  "psutil>=5.9",
+  "requests>=2.31",
+]
+
+[project.optional-dependencies]
+# Windows media session (now playing). Package names as published on PyPI by the pywinrt project.
+media = [
+  "winrt-runtime; sys_platform == 'win32'",
+  "winrt-Windows.Foundation; sys_platform == 'win32'",
+  "winrt-Windows.Foundation.Collections; sys_platform == 'win32'",
+  "winrt-Windows.Media.Control; sys_platform == 'win32'",
+]
+dev = ["pytest>=8", "pytest-cov", "ruff"]
+
+[project.scripts]
+dynamic-island = "dynamic_island.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["dynamic_island*"]
+
+[tool.setuptools.package-data]
+dynamic_island = ["assets/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/test_gui_smoke.py" = ["E402"]
+"scripts/*" = ["E702"]

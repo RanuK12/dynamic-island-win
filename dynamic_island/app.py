@@ -20,6 +20,39 @@ ctk.set_default_color_theme("blue")
 IS_WINDOWS = sys.platform == "win32"
 
 
+def enable_dpi_awareness() -> None:
+    """Windows only: opt in to per-monitor DPI awareness *before* the first Tk window exists.
+
+    Without this the process is DPI-virtualised: ``winfo_screenwidth()`` reports the scaled size
+    (1707 on a 2560 px screen at 150%) while CustomTkinter already multiplies window sizes by the
+    scale factor, so the pill ends up off-centre. Calling it twice, or after another library
+    already chose a mode, is harmless (Windows just refuses the second call).
+    """
+    if not IS_WINDOWS:
+        return
+    try:
+        ctypes.windll.shcore.SetProcessDpiAwareness(2)  # PROCESS_PER_MONITOR_DPI_AWARE
+    except Exception:
+        try:
+            ctypes.windll.user32.SetProcessDPIAware()
+        except Exception:
+            pass
+
+
+def fit_text(text: str, measure, max_px: float) -> str:
+    """Return ``text`` cut to the longest prefix that fits ``max_px`` (ending in an ellipsis)."""
+    if max_px <= 0 or measure(text) <= max_px:
+        return text
+    lo, hi = 0, len(text)
+    while lo < hi:  # longest n such that text[:n] + "…" fits
+        mid = (lo + hi + 1) // 2
+        if measure(text[:mid].rstrip() + "…") <= max_px:
+            lo = mid
+        else:
+            hi = mid - 1
+    return text[:lo].rstrip() + "…" if lo else "…"
+
+
 def hide_from_taskbar(hwnd: int) -> None:
     """Windows only: make the island a tool window (no taskbar button, not in Alt+Tab)."""
     if not IS_WINDOWS:
@@ -38,6 +71,7 @@ def hide_from_taskbar(hwnd: int) -> None:
 
 class IslandApp(ctk.CTk):
     def __init__(self, ctx: Context, registry: Registry, start_expanded: bool = False) -> None:
+        enable_dpi_awareness()
         super().__init__()
         self.ctx = ctx
         ui = {**DEFAULTS["ui"], **ctx.config.get("ui", {})}
@@ -61,7 +95,7 @@ class IslandApp(ctk.CTk):
             self.wm_attributes("-transparentcolor", self.t.transparent_key)
 
         sw = self.winfo_screenwidth()
-        self.geometry(f"{self.cw}x{self.ch}+{(sw - self.cw) // 2}+{self.top_margin}")
+        self.geometry(f"{self.cw}x{self.ch}+{(sw - self.px(self.cw)) // 2}+{self.top_margin}")
 
         self._build_shell()
         for w in self.widgets:
@@ -73,6 +107,23 @@ class IslandApp(ctk.CTk):
         self._tick()
         if start_expanded:
             self.after(200, self.expand)
+
+    # --- scaling ---------------------------------------------------------
+    @property
+    def scale(self) -> float:
+        """CustomTkinter's window scale factor (1.0 at 100%, 1.5 at 150% display scaling)."""
+        try:
+            return float(ctk.ScalingTracker.get_window_scaling(self))
+        except Exception:
+            return 1.0
+
+    def px(self, logical: float) -> int:
+        """Logical size -> real pixels, the way ``CTk.geometry`` scales width/height.
+
+        ``geometry("WxH+X+Y")`` scales W and H but not X and Y, and ``winfo_*`` returns real
+        pixels, so anything that mixes the two (centering) has to convert explicitly.
+        """
+        return int(logical * self.scale)
 
     # --- layout ----------------------------------------------------------
     def _build_shell(self) -> None:
@@ -87,7 +138,8 @@ class IslandApp(ctk.CTk):
         self.dot.pack(side="left", padx=(0, 6))
         self.pill_icon = ctk.CTkLabel(self.bar, text="", font=(t.font, 13), text_color=t.accent_text)
         self.pill_icon.pack(side="left", padx=(0, 4))
-        self.pill_text = ctk.CTkLabel(self.bar, text="", font=(t.font, 12, "bold"), text_color=t.text, anchor="w")
+        self.pill_font = ctk.CTkFont(family=t.font, size=12, weight="bold")
+        self.pill_text = ctk.CTkLabel(self.bar, text="", font=self.pill_font, text_color=t.text, anchor="w")
         self.pill_text.pack(side="left", fill="x", expand=True)
         self.pill_clock = ctk.CTkLabel(self.bar, text="", font=(t.font, 12, "bold"), text_color=t.muted)
         self.pill_clock.pack(side="right")
@@ -167,14 +219,14 @@ class IslandApp(ctk.CTk):
 
     def _animate(self, w0, h0, w1, h1, steps: int = 10, then=None) -> None:
         self._animating = True
-        cx = self.winfo_x() + self.winfo_width() // 2
+        cx = self.winfo_x() + self.winfo_width() // 2  # real pixels
         y = self.winfo_y()
 
         def frame(i: int) -> None:
             t = (i + 1) / steps
             e = 1 - (1 - t) ** 3  # ease-out
             w, h = int(w0 + (w1 - w0) * e), int(h0 + (h1 - h0) * e)
-            self.geometry(f"{w}x{h}+{cx - w // 2}+{y}")
+            self.geometry(f"{w}x{h}+{cx - self.px(w) // 2}+{y}")
             if i + 1 < steps:
                 self.after(16, frame, i + 1)
             else:
@@ -210,12 +262,23 @@ class IslandApp(ctk.CTk):
             except Exception:
                 pass
         view = self.controller.step(now, self.widgets)
-        self.pill_text.configure(text=view.text or "Dynamic Island")
+        self.pill_text.configure(text=self._fit_pill_text(view.text or "Dynamic Island"))
         self.pill_icon.configure(text=view.icon, text_color=view.accent or self.t.accent_text)
         self.dot.configure(text_color=view.accent or self.t.ok)
         self.pill_clock.configure(text=datetime.now().strftime("%H:%M"))
         self._refresh_current()
         self.after(1000, self._tick)
+
+    def _fit_pill_text(self, text: str) -> str:
+        """Truncate ``text`` with an ellipsis so it never runs under the clock or off the pill."""
+        scale = self.scale
+        try:
+            bar = self.bar.winfo_width() / scale if self.bar.winfo_width() > 1 else self.cw - 28
+            used = sum(w.winfo_reqwidth() for w in (self.dot, self.pill_icon, self.pill_clock)) / scale
+            avail = bar - used - 16  # label paddings and a little slack
+            return fit_text(text, self.pill_font.measure, avail)
+        except Exception:
+            return text
 
     def quit_app(self) -> None:
         for w in self.widgets:

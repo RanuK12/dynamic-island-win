@@ -61,8 +61,9 @@ A widget is one Python file with a `register(registry)` function. See [docs/PLUG
 
 Early (v0.1.0). Being upfront about what has and has not been verified:
 
-- The timer, weather parsing, controller, config, plugin loading and the Tk window are covered by automated tests (see [CONTRIBUTING](CONTRIBUTING.md)), run on Linux under Xvfb with Python 3.10, 3.11 and 3.12.
-- **Not yet verified on real Windows:** the now-playing integration (`winrt` packages), window transparency, the taskbar hiding and the look with the Segoe UI font. Reports and screenshots are welcome.
+- The timer, weather parsing, controller, config, plugin loading and the Tk window are covered by automated tests (see [CONTRIBUTING](CONTRIBUTING.md)), run on Linux under Xvfb with Python 3.10, 3.11 and 3.12. The centering test also runs with CustomTkinter's scaling forced to 150%.
+- **Tried once on real Windows 11** (Python 3.12, 2560×1440 display at 150% scaling): the dependencies (including the `[media]` extra) install, 46 of the 47 tests then in the suite passed, and `dynamic-island --demo` opens without errors. That run found three problems at 150% scaling, fixed in the `fix/windows-dpi` branch: the pill was off-centre, the alert text was cut off at the right edge, and the one failing test compared a logical width with a scaled one.
+- **Still not verified on real Windows:** the fixes above on a real 150% screen (only checked on Linux so far), other scales (100%, 200%, mixed-DPI multi-monitor), Windows 10, the now-playing integration (`winrt` installs, but playback was never exercised), window transparency at the corners, hiding from the taskbar, clicking and dragging, the expanded view, and the look with the Segoe UI font. Reports and screenshots are welcome.
 - The web demo is a mock-up written in plain HTML/CSS/JS with sample data; it shares no code with the app.
 
 ## Contributing
@@ -71,7 +72,7 @@ Issues and pull requests are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.
 
 ## Roadmap
 
-- [ ] Verify and polish on real Windows 10/11, add real screenshots
+- [ ] Verify and polish on real Windows 10/11 (one 150% run so far), add real screenshots
 - [ ] Windows `.exe` on the Releases page (PyInstaller)
 - [ ] Publish to PyPI
 - [ ] Autostart option

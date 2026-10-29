@@ -5,7 +5,7 @@ Thanks for helping out. The project is small on purpose, so the bar to contribut
 ## Set up
 
 ```bash
-git clone https://github.com/OWNER/dynamic-island-win
+git clone https://github.com/RanuK12/dynamic-island-win
 cd dynamic-island-win
 python -m venv .venv && . .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"

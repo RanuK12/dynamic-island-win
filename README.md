@@ -12,7 +12,7 @@ A small always-on-top pill for your Windows desktop that expands into music, wea
 ## Install
 
 ```bash
-pipx install "dynamic-island-win[media] @ git+https://github.com/OWNER/dynamic-island-win"
+pipx install "dynamic-island-win[media] @ git+https://github.com/RanuK12/dynamic-island-win"
 dynamic-island
 ```
 

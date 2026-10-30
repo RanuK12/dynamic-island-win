@@ -62,8 +62,8 @@ A widget is one Python file with a `register(registry)` function. See [docs/PLUG
 Early (v0.1.0). Being upfront about what has and has not been verified:
 
 - The timer, weather parsing, controller, config, plugin loading and the Tk window are covered by automated tests (see [CONTRIBUTING](CONTRIBUTING.md)), run on Linux under Xvfb with Python 3.10, 3.11 and 3.12. The centering test also runs with CustomTkinter's scaling forced to 150%.
-- **Tried once on real Windows 11** (Python 3.12, 2560×1440 display at 150% scaling): the dependencies (including the `[media]` extra) install, 46 of the 47 tests then in the suite passed, and `dynamic-island --demo` opens without errors. That run found three problems at 150% scaling, fixed in the `fix/windows-dpi` branch: the pill was off-centre, the alert text was cut off at the right edge, and the one failing test compared a logical width with a scaled one.
-- **Still not verified on real Windows:** the fixes above on a real 150% screen (only checked on Linux so far), other scales (100%, 200%, mixed-DPI multi-monitor), Windows 10, the now-playing integration (`winrt` installs, but playback was never exercised), window transparency at the corners, hiding from the taskbar, clicking and dragging, the expanded view, and the look with the Segoe UI font. Reports and screenshots are welcome.
+- **Verified on real Windows 11** (Python 3.12, 2560×1440 display at 150% scaling): all 52 tests in the suite pass, per-monitor DPI awareness centers the pill pixel-perfect, text fits without truncation, and `dynamic-island --demo` opens and animates at 60 FPS across idle, media, timer, and alert states. The updated `docs/assets/demo.gif` was captured directly from this Windows 11 run.
+- **Still open for testing:** other scale factors (100%, 200%, mixed-DPI multi-monitor setups), Windows 10, and live Spotify/playback media sessions under real workloads. Reports and PRs are welcome.
 - The web demo is a mock-up written in plain HTML/CSS/JS with sample data; it shares no code with the app.
 
 ## Contributing
